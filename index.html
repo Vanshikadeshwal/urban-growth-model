@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban Growth Intelligence — Predictive Real Estate Model</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">UGI</div>
+      <div class="logo-text">Urban Growth<br><span>Intelligence</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-tab="zones">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Zone Rankings
+      </a>
+      <a href="#" class="nav-item" data-tab="signals">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Signal Matrix
+      </a>
+      <a href="#" class="nav-item" data-tab="projection">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Projections
+      </a>
+      <a href="#" class="nav-item" data-tab="analysis">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Trend Analysis
+      </a>
+      <a href="#" class="nav-item" data-tab="ingest">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Data Ingest
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="data-source-badge">Delhi NCR</div>
+      <div class="last-updated">Last updated: Apr 2026</div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div>
+          <div class="page-title" id="page-title">Zone Rankings</div>
+          <div class="page-subtitle">Growth Velocity Score across 14 NCR micro-markets</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-pill">
+          <span class="status-dot"></span> Live Model
+        </div>
+        <select id="city-select" onchange="switchCity(this.value)">
+          <option value="ncr">Delhi NCR</option>
+          <option value="mumbai">Mumbai MMR</option>
+          <option value="bangalore">Bangalore</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- METRIC CARDS -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-label">Zones Tracked</div>
+        <div class="metric-value" id="m-zones">14</div>
+        <div class="metric-sub">NCR micro-markets</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">High-Growth Zones</div>
+        <div class="metric-value green" id="m-highgrowth">5</div>
+        <div class="metric-sub">GVS &gt; 75</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Avg Price Velocity</div>
+        <div class="metric-value" id="m-velocity">+8.4%</div>
+        <div class="metric-sub">YoY appreciation</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Active Tenders</div>
+        <div class="metric-value blue" id="m-tenders">23</div>
+        <div class="metric-sub">Municipal declarations</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Rental Yield Gap</div>
+        <div class="metric-value amber" id="m-gap">2.1%</div>
+        <div class="metric-sub">vs selling benchmark</div>
+      </div>
+    </div>
+
+    <!-- PANELS -->
+
+    <!-- ZONE RANKINGS -->
+    <div class="panel active" id="panel-zones">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Growth Velocity Score — All Zones</div>
+          <div class="card-actions">
+            <label>Sort by:</label>
+            <select onchange="sortZones(this.value)">
+              <option value="gvs">GVS Score</option>
+              <option value="yield">Rental Yield</option>
+              <option value="appreciation">Appreciation</option>
+              <option value="listing">Listing Density</option>
+            </select>
+          </div>
+        </div>
+        <div id="zone-list" class="zone-list"></div>
+        <div class="card-footer">GVS = weighted composite: Municipal Declarations (35%) + Pricing Velocity (25%) + Listing Density (20%) + Rental Absorption (20%)</div>
+      </div>
+    </div>
+
+    <!-- SIGNAL MATRIX -->
+    <div class="panel" id="panel-signals">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Data Stream Signal Matrix — Top 8 Zones</div></div>
+        <div class="table-wrap">
+          <table class="signal-table">
+            <thead>
+              <tr>
+                <th>Zone</th>
+                <th>Municipal Declarations</th>
+                <th>Listing Density</th>
+                <th>Pricing Velocity</th>
+                <th>Rental Absorption</th>
+                <th>GVS</th>
+                <th>Growth Horizon</th>
+              </tr>
+            </thead>
+            <tbody id="signal-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header"><div class="card-title">Active Municipal Declarations</div></div>
+        <div id="tender-list"></div>
+      </div>
+    </div>
+
+    <!-- PROJECTIONS -->
+    <div class="panel" id="panel-projection">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Price Appreciation Projection</div>
+          <div class="card-actions">
+            <button class="horizon-btn active" onclick="setHorizon(24,this)">24 months</button>
+            <button class="horizon-btn" onclick="setHorizon(36,this)">36 months</button>
+            <button class="horizon-btn" onclick="setHorizon(60,this)">60 months</button>
+          </div>
+        </div>
+        <div id="proj-legend" class="chart-legend"></div>
+        <div style="position:relative;height:300px;"><canvas id="projChart"></canvas></div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header"><div class="card-title">Zone Heat Classification</div></div>
+        <div id="heatmap-grid" class="heatmap-grid"></div>
+      </div>
+    </div>
+
+    <!-- TREND ANALYSIS -->
+    <div class="panel" id="panel-analysis">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Rental Yield vs Price Appreciation — Undervaluation Detector</div></div>
+        <div style="position:relative;height:300px;"><canvas id="yieldChart"></canvas></div>
+        <div class="card-footer">Zones in the upper-left quadrant (high yield, low appreciation) are undervalued and primed for rapid growth.</div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header"><div class="card-title">Correlation Model — Adjust GVS Weights</div></div>
+        <div class="weight-controls">
+          <div class="weight-row">
+            <label>Municipal Declarations</label>
+            <input type="range" min="10" max="60" value="35" id="w-muni" oninput="updateWeights()">
+            <span id="v-muni">35%</span>
+          </div>
+          <div class="weight-row">
+            <label>Pricing Velocity</label>
+            <input type="range" min="10" max="50" value="25" id="w-price" oninput="updateWeights()">
+            <span id="v-price">25%</span>
+          </div>
+          <div class="weight-row">
+            <label>Listing Density</label>
+            <input type="range" min="5" max="40" value="20" id="w-listing" oninput="updateWeights()">
+            <span id="v-listing">20%</span>
+          </div>
+          <div class="weight-row">
+            <label>Rental Absorption</label>
+            <input type="range" min="5" max="40" value="20" id="w-rental" oninput="updateWeights()">
+            <span id="v-rental">20%</span>
+          </div>
+        </div>
+        <div class="weight-sum-row">
+          <span>Total weight: </span><span id="weight-total" class="weight-total">100%</span>
+          <span id="weight-warning" class="weight-warning hidden"> ⚠ Weights must sum to 100%</span>
+        </div>
+        <div id="recalc-zones" class="zone-list" style="margin-top:12px;"></div>
+      </div>
+    </div>
+
+    <!-- DATA INGEST -->
+    <div class="panel" id="panel-ingest">
+      <div class="ingest-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Add / Update Zone Data</div></div>
+          <div class="form-group">
+            <label>Zone Name</label>
+            <input type="text" id="i-name" placeholder="e.g. Noida Sector 62" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Municipal Score (0–100)</label>
+              <input type="number" id="i-muni" min="0" max="100" placeholder="75" />
+            </div>
+            <div class="form-group">
+              <label>Listing Density (0–100)</label>
+              <input type="number" id="i-listing" min="0" max="100" placeholder="60" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pricing Velocity (0–100)</label>
+              <input type="number" id="i-pricing" min="0" max="100" placeholder="70" />
+            </div>
+            <div class="form-group">
+              <label>Rental Absorption (0–100)</label>
+              <input type="number" id="i-rental" min="0" max="100" placeholder="65" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Rental Yield (%)</label>
+              <input type="number" id="i-yield" step="0.1" placeholder="4.2" />
+            </div>
+            <div class="form-group">
+              <label>Price Appreciation (%/yr)</label>
+              <input type="number" id="i-appr" step="0.1" placeholder="9.5" />
+            </div>
+          </div>
+          <button class="btn-primary" onclick="ingestZone()">Add Zone to Model</button>
+          <div id="ingest-msg" class="ingest-msg hidden"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Add Municipal Declaration</div></div>
+          <div class="form-group">
+            <label>Zone</label>
+            <input type="text" id="t-zone" placeholder="e.g. Dwarka Expressway" />
+          </div>
+          <div class="form-group">
+            <label>Declaration Type</label>
+            <input type="text" id="t-type" placeholder="e.g. Metro Extension Phase V" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Status</label>
+              <select id="t-status">
+                <option>Tendered</option>
+                <option>Awarded</option>
+                <option>Ongoing</option>
+                <option>Declared</option>
+                <option>Completed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Impact</label>
+              <select id="t-impact">
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="ingestTender()">Add Declaration</button>
+          <div id="tender-msg" class="ingest-msg hidden"></div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1;">
+          <div class="card-header"><div class="card-title">Current Dataset</div></div>
+          <div class="table-wrap">
+            <table class="signal-table" id="ingest-preview-table">
+              <thead>
+                <tr><th>Zone</th><th>Muni</th><th>Listing</th><th>Pricing</th><th>Rental</th><th>Yield %</th><th>Appr %</th><th>GVS</th><th></th></tr>
+              </thead>
+              <tbody id="ingest-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="data/zones.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
